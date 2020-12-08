@@ -10,7 +10,7 @@ module.exports = function (graphUrl, authHeader) {
         query: graphql.introspectionQuery
     };
 
-    const headers = Object.fromEntries([authHeader.split(":")]);
+    const headers = authHeader ? Object.fromEntries([authHeader.split(":")]) : {};
 
     const responseBody = request("POST", graphUrl, {
         headers,
