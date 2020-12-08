@@ -37,6 +37,7 @@
     "bluebird": "^3.5.2",
     "cheerio": "^1.0.0-rc.2",
     "clarify": "^2.1.0",
+    "coffeescript": "^2.5.1",
     "commander": "*",
     "foundation-sites": "^6.5.0-rc.4",
     "graphql": "^14.1.1",
