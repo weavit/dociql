@@ -1,13 +1,12 @@
-const graphql = require('graphql')
+const { getIntrospectionQuery, buildClientSchema } = require('graphql')
 const request = require("sync-request")
 
 const converter = require('graphql-2-json-schema');
 
-module.exports = function (graphUrl, authHeader) {
-
+module.exports = function (graphUrl, authHeader) { 
     const requestBody = {
         operationName: "IntrospectionQuery",
-        query: graphql.introspectionQuery
+        query: getIntrospectionQuery()
     };
 
     const headers = authHeader ? Object.fromEntries([authHeader.split(":")]) : {};
@@ -17,10 +16,10 @@ module.exports = function (graphUrl, authHeader) {
         json: requestBody
     }).getBody('utf8');
 
-    const introspectionResponse = JSON.parse(responseBody);    
+    const introspectionResponse = JSON.parse(responseBody);   
 
+    const graphQLSchema = buildClientSchema(introspectionResponse.data);
     const jsonSchema = converter.fromIntrospectionQuery(introspectionResponse.data);
-    const graphQLSchema = graphql.buildClientSchema(introspectionResponse.data, { assumeValid: true});
 
     return {
         jsonSchema,
