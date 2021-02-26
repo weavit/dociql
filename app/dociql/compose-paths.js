@@ -14,7 +14,7 @@ function getExpandField(expandNotation) {
     return result;
 }
 
-module.exports = function (domains, graphQLSchema) {
+module.exports = function (graphQLSchema, mutations, queries) {
 
     function composePath(tag, usecase) {
         const result = {}
@@ -30,9 +30,10 @@ module.exports = function (domains, graphQLSchema) {
 
         var target = typeDict;
         queryTokens.forEach((token, i) => {
+
             if (i != 0)
                 target = target.getFields()[token]
-        });        
+        });
 
         const expandFields = usecase.expand ?
             usecase.expand.split(",").map(getExpandField) :
@@ -55,15 +56,16 @@ module.exports = function (domains, graphQLSchema) {
             schema: convertTypeToSchema(_.type)
         })) : [];
 
-        const bodyArg = { in: "body",
+        const bodyArg = {
+            in: "body",
             example: examples.query,
             schema: args.length == 0 ?
                 null :
                 {
                     type: "object",
                     properties: args.reduce((cur, next) => {
-                        cur[next.name] = Object.assign({}, next.schema)     
-                        return cur;                   
+                        cur[next.name] = Object.assign({}, next.schema)
+                        return cur;
                     }, {})
                 }
         }
@@ -92,9 +94,13 @@ module.exports = function (domains, graphQLSchema) {
     }
 
     const paths = {}
-
-    domains.forEach(domain => {
-        domain.usecases.forEach(u => Object.assign(paths, composePath(domain.name, u)));
+    queries.fields.sort((a, b) => a.name < b.name ? -1 : 1).forEach(domain => {
+        domain.query = `query.${domain.name}`;
+        Object.assign(paths, composePath('Queries', domain))
+    });
+    mutations.fields.sort((a, b) => a.name < b.name ? -1 : 1).forEach(domain => {
+        domain.query = `mutation.${domain.name}`;
+        Object.assign(paths, composePath('Mutations', domain))
     });
 
     return paths
